@@ -3,21 +3,24 @@ import { Container, Row, Col, Navbar } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../css/App.scss';
 import icon from '../svg/logo.svg'
-import { Brainfuck } from '../core/Brainfuck';
+import { Brainfuck, Status } from '../core/Brainfuck';
 import CodeForm from './CodeForm';
 import Result from './Result';
 import CodeViewer from './CodeViewer';
 import MemoryViewer from './MemoryViewer';
+
+interface AppProps {}
 
 interface AppState {
   code: string
   result: string
   memory: Int8Array
   ptr: number
-  codePointer: number
+  codePointer: number,
+  status: Status
 };
 
-export default class App extends React.Component<any, AppState> {
+export default class App extends React.Component<AppProps, AppState> {
 
   brainfuck: Brainfuck;
   result: string
@@ -29,25 +32,28 @@ export default class App extends React.Component<any, AppState> {
       result: '',
       memory: null,
       ptr: null,
-      codePointer: null
+      codePointer: null,
+      status: null
     };
     this.handleChangeCode = this.handleChangeCode.bind(this);
     this.handleRunCode = this.handleRunCode.bind(this);
     this.handleStepCode = this.handleStepCode.bind(this);
     this.handleStop = this.handleStop.bind(this);
-    this.result =''
+    this.result = '';
   }
 
   handleChangeCode(code: string) {
     this.brainfuck = new Brainfuck(code, {
       write: this.handleUpdateResult.bind(this),
       codePointTracer: this.handleUpdateCodePointer.bind(this),
-      MemoryTracer: this.handleUpdateMemory.bind(this)
+      MemoryTracer: this.handleUpdateMemory.bind(this),
+      onChangeStatus: this.handleChangeStatus.bind(this),
     });
     this.setState({
       code: this.brainfuck.code,
       result: ''
     });
+    this.result = '';
   }
 
   handleUpdateResult(n: number) {
@@ -77,6 +83,10 @@ export default class App extends React.Component<any, AppState> {
     this.brainfuck.stop();
   }
 
+  handleChangeStatus(status) {
+    this.setState({status});
+  }
+
   render() {
     return (
       <div>
@@ -100,6 +110,7 @@ export default class App extends React.Component<any, AppState> {
               <Row className="m-4">
                 <Col>
                   <CodeForm
+                    status={this.state.status}
                     updateCode={this.handleChangeCode}
                     runCode={this.handleRunCode}
                     stepCode={this.handleStepCode}

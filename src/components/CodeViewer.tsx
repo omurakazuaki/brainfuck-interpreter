@@ -15,7 +15,7 @@ export default class CodeViewer extends React.Component<CodeViewerProps> {
       return null;
     }
     return _([...this.props.code])
-      .map((c, i) => <code className={this.props.codePointer === i ? 'bg-light' : ''}>{c}</code>)
+      .map((c, i) => <code key={i} className={this.props.codePointer === i ? 'bg-light' : ''}>{c}</code>)
       .value();
   }
 

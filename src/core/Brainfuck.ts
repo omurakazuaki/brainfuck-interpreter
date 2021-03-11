@@ -2,10 +2,12 @@ type Write = (char: number) => void;
 type Read = () => number;
 type CodePointTracer = (number) => void;
 type MemoryTracer = (memory: Int8Array, ptr: number) => void;
+type OnChangeStatus = (status: Status) => void;
 
 type Option = {
   codePointTracer?: CodePointTracer;
   MemoryTracer?: MemoryTracer;
+  onChangeStatus?: OnChangeStatus;
   write?: Write;
   read?: Read;
   memorySize?: number;
@@ -22,6 +24,12 @@ type Option = {
   }
 };
 
+export enum Status {
+  RUNNING,
+  STOPPING,
+  STOPPED
+}
+
 export class Brainfuck {
 
   opt: Option;
@@ -29,7 +37,7 @@ export class Brainfuck {
   ptr: number;
   code: string;
   codePointer: number;
-  isStopping: boolean = false;
+  status: Status = null;
 
   commands: string[];
   jumpByOpen;
@@ -40,6 +48,7 @@ export class Brainfuck {
     const defaultOption: Option = {
       codePointTracer: _ => {},
       MemoryTracer: _ => {},
+      onChangeStatus: _ => {},
       write: _ => {},
       read: () => -1, // TODO
       memorySize: 1024,
@@ -75,7 +84,7 @@ export class Brainfuck {
     this.commands = Object.values(this.opt.commands);
     this.opt.codePointTracer(this.codePointer);
     this.opt.MemoryTracer(this.memory, this.ptr);
-    this.isStopping = false;
+    this.changeStatus(Status.STOPPED);
   }
 
   jumpList(): number[][] {
@@ -113,17 +122,18 @@ export class Brainfuck {
   }
 
   async run() {
-    while (this.code[this.codePointer] && !this.isStopping) {
+    this.changeStatus(Status.RUNNING);
+    while (this.code[this.codePointer] && this.status === Status.RUNNING) {
       await new Promise<void>(resolve =>{
         setTimeout(resolve);
       });
       this.step();
     }
-    this.isStopping = false;
+    this.changeStatus(Status.STOPPED);
   }
 
   stop() {
-    this.isStopping = true;
+    this.changeStatus(Status.STOPPING);
   }
 
   step() {
@@ -155,5 +165,12 @@ export class Brainfuck {
     this.codePointer += command?.length || 1;
     this.opt.codePointTracer(this.codePointer);
     this.opt.MemoryTracer(this.memory, this.ptr);
+  }
+
+  changeStatus(status: Status) {
+    if (this.status !== status) {
+      this.status = status;
+      this.opt.onChangeStatus(status);
+    }
   }
 };

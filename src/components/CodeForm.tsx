@@ -1,12 +1,14 @@
 import React from 'react';
 import { Form, ButtonGroup, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { Status } from '../core/Brainfuck';
 
 interface CodeFormProps {
   updateCode: (string) => void,
   runCode: () => void,
   stepCode: () => void,
   stop:() => void,
+  status: Status
 };
 
 export default class CodeForm extends React.Component<CodeFormProps> {
@@ -41,10 +43,10 @@ export default class CodeForm extends React.Component<CodeFormProps> {
         <Form.Label>Code</Form.Label>
         <Form.Control as="textarea" aria-label="code" rows={10} onChange={this.handleChangeCode} />
         <ButtonGroup className="mr-5">
-          <Button variant="info" onClick={this.handleClickRun}>RUN</Button>
-          <Button variant="info" onClick={this.handleClickStep}>STEP</Button>
+          <Button variant="info" onClick={this.handleClickRun} disabled={this.props.status === null || this.props.status !== Status.STOPPED}>RUN</Button>
+          <Button variant="info" onClick={this.handleClickStep} disabled={this.props.status === null || this.props.status !== Status.STOPPED}>STEP</Button>
         </ButtonGroup>
-        <Button variant="secondary" onClick={this.handleClickStop}>STOP</Button>
+        <Button variant="secondary" onClick={this.handleClickStop} disabled={this.props.status !== Status.RUNNING}>STOP</Button>
       </Form>
     );
   }

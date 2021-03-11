@@ -16,7 +16,7 @@ export default class MemoryViewer extends React.Component<MemoryViewerProps> {
     }
     return _(this.props.memory)
       .chunk(16)
-      .map((l, i) => <Row>{_.map(l, (m, j)=><Col><code className={this.props.ptr === i * 16 + j ? 'bg-light' : ''}>{`${m}`.padStart(3, '0')}</code></Col>)}</Row>)
+      .map((l, i) => <Row key={i}>{_.map(l, (m, j)=><Col key={i * 16 + j}><code className={this.props.ptr === i * 16 + j ? 'bg-light' : ''}>{`${m}`.padStart(3, '0')}</code></Col>)}</Row>)
       .value();
   }
 
