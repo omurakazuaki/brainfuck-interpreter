@@ -1,0 +1,15 @@
+.base {
+  background-color: #282c34;
+  min-height: calc(100vh - 56px);
+  font-size: calc(10px + 1vmin);
+  color: white;
+}
+
+.code {
+  overflow-y: scroll;
+}
+
+.memory {
+  height: 50vh;
+  overflow-y: scroll;
+}
