@@ -41,6 +41,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.handleRunCode = this.handleRunCode.bind(this);
     this.handleStepCode = this.handleStepCode.bind(this);
     this.handleStop = this.handleStop.bind(this);
+    this.handleReset = this.handleReset.bind(this);
     this.handleSetBreakPoint = this.handleSetBreakPoint.bind(this);
     this.result = '';
   }
@@ -87,6 +88,16 @@ export default class App extends React.Component<AppProps, AppState> {
     this.brainfuck.stop();
   }
 
+  handleReset() {
+    this.brainfuck.reset();
+    this.setState({
+      code: this.brainfuck.code,
+      breakPoints: this.brainfuck.breakPoints,
+      result: ''
+    });
+    this.result = '';
+  }
+
   handleChangeStatus(status) {
     this.setState({status});
   }
@@ -125,7 +136,8 @@ export default class App extends React.Component<AppProps, AppState> {
                     updateCode={this.handleChangeCode}
                     runCode={this.handleRunCode}
                     stepCode={this.handleStepCode}
-                    stop={this.handleStop} />
+                    stop={this.handleStop}
+                    reset={this.handleReset} />
                 </Col>
               </Row>
               <Row>

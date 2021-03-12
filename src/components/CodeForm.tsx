@@ -8,6 +8,7 @@ interface CodeFormProps {
   runCode: () => void,
   stepCode: () => void,
   stop:() => void,
+  reset:() => void,
   status: Status
 };
 
@@ -19,6 +20,7 @@ export default class CodeForm extends React.Component<CodeFormProps> {
     this.handleClickRun = this.handleClickRun.bind(this);
     this.handleClickStep = this.handleClickStep.bind(this);
     this.handleClickStop = this.handleClickStop.bind(this);
+    this.handleClickReset = this.handleClickReset.bind(this);
   }
 
   handleChangeCode(e) {
@@ -37,18 +39,25 @@ export default class CodeForm extends React.Component<CodeFormProps> {
     this.props.stop();
   }
 
+  handleClickReset(_) {
+    this.props.reset();
+  }
+
   render() {
     return (
       <div>
         <Form>
           <Form.Label>Code</Form.Label>
           <Form.Row className="mb-4">
-            <Form.Control as="textarea" aria-label="code" rows={10} onChange={this.handleChangeCode} />
+            <Form.Control as="textarea" aria-label="code" rows={18} onChange={this.handleChangeCode} />
           </Form.Row>
         </Form>
         <div className="d-flex">
           <div className="mr-auto">
-            <Button variant="secondary" onClick={this.handleClickStop} disabled={this.props.status !== Status.RUNNING}>STOP</Button>
+            <ButtonGroup>
+              <Button variant="secondary" onClick={this.handleClickStop} disabled={this.props.status !== Status.RUNNING}>STOP</Button>
+              <Button variant="secondary" onClick={this.handleClickReset} disabled={this.props.status === null || this.props.status !== Status.STOPPED}>RESET</Button>
+            </ButtonGroup>
           </div>
           <div>
             <ButtonGroup>
