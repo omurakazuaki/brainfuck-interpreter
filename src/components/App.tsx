@@ -1,13 +1,13 @@
 import React from 'react';
-import { Container, Row, Col, Navbar } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import '../css/App.scss';
-import icon from '../svg/logo.svg'
+import { Container, Row, Col } from 'react-bootstrap';
 import { Brainfuck, Status } from '../core/Brainfuck';
+import Header from './Header';
 import CodeForm from './CodeForm';
 import Result from './Result';
 import CodeViewer from './CodeViewer';
 import MemoryViewer from './MemoryViewer';
+import Footer from './Footer';
+import '../css/App.scss';
 
 interface AppProps {}
 
@@ -111,21 +111,8 @@ export default class App extends React.Component<AppProps, AppState> {
 
   render() {
     return (
-      <div>
-        <Navbar bg="dark" expand="lg">
-          <Navbar.Brand href="#home">
-            <div className='site-name'>
-              <img
-                alt=""
-                src={icon}
-                width="30"
-                height="30"
-                className="d-inline-block align-top"
-              />{' '}
-              Brainfuck Interpreter
-            </div>
-          </Navbar.Brand>
-        </Navbar>
+      <div className="d-flex flex-column">
+        <Header/>
         <Container className='base' fluid={true}>
           <Row>
             <Col sm={4}>
@@ -166,6 +153,7 @@ export default class App extends React.Component<AppProps, AppState> {
             </Col>
           </Row>
         </Container>
+        <Footer/>
       </div>
     );
   }

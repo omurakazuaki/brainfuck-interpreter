@@ -1,6 +1,6 @@
 .base {
   background-color: #282c34;
-  min-height: calc(100vh - 56px);
+  min-height: calc(100vh - 112px);
   font-size: calc(10px + 1vmin);
   color: white;
 }
@@ -10,8 +10,9 @@
 }
 
 .code {
-  display: block;
+  display: block !important;
   height: 30vh;
+  font-size: 1.3rem;
   overflow-y: scroll;
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
@@ -33,4 +34,8 @@
 
 .result {
   background: white !important;
+}
+
+.footer-link {
+  color: white;
 }

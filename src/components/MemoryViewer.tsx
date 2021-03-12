@@ -1,5 +1,4 @@
 import React from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { Row, Col, Form } from 'react-bootstrap';
 import * as _ from 'lodash';
 

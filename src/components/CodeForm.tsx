@@ -1,6 +1,5 @@
 import React from 'react';
 import { Form, ButtonGroup, Button } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { Status } from '../core/Brainfuck';
 
 interface CodeFormProps {
