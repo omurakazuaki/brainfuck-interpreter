@@ -5,11 +5,32 @@
   color: white;
 }
 
+.site-name {
+  color: #61dafb;
+}
+
 .code {
+  display: block;
+  height: 30vh;
   overflow-y: scroll;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
 }
 
 .memory {
   height: 50vh;
   overflow-y: scroll;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.token {
+  cursor: pointer;
+  &:hover {
+    background: #e66f7b;
+  }
+}
+
+.result {
+  background: white !important;
 }

@@ -17,7 +17,8 @@ interface AppState {
   memory: Int8Array
   ptr: number
   codePointer: number,
-  status: Status
+  status: Status,
+  breakPoints: number[]
 };
 
 export default class App extends React.Component<AppProps, AppState> {
@@ -33,12 +34,14 @@ export default class App extends React.Component<AppProps, AppState> {
       memory: null,
       ptr: null,
       codePointer: null,
-      status: null
+      status: null,
+      breakPoints: []
     };
     this.handleChangeCode = this.handleChangeCode.bind(this);
     this.handleRunCode = this.handleRunCode.bind(this);
     this.handleStepCode = this.handleStepCode.bind(this);
     this.handleStop = this.handleStop.bind(this);
+    this.handleSetBreakPoint = this.handleSetBreakPoint.bind(this);
     this.result = '';
   }
 
@@ -51,6 +54,7 @@ export default class App extends React.Component<AppProps, AppState> {
     });
     this.setState({
       code: this.brainfuck.code,
+      breakPoints: this.brainfuck.breakPoints,
       result: ''
     });
     this.result = '';
@@ -87,6 +91,13 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setState({status});
   }
 
+  handleSetBreakPoint(bp: number) {
+    this.brainfuck.setBreakPoints(bp);
+    this.setState({
+      breakPoints: this.brainfuck.breakPoints
+    });
+  }
+
   render() {
     return (
       <div>
@@ -106,7 +117,7 @@ export default class App extends React.Component<AppProps, AppState> {
         </Navbar>
         <Container className='base' fluid={true}>
           <Row>
-            <Col sm={6}>
+            <Col sm={4}>
               <Row className="m-4">
                 <Col>
                   <CodeForm
@@ -123,15 +134,21 @@ export default class App extends React.Component<AppProps, AppState> {
                 </Col>
               </Row>
             </Col>
-            <Col sm={6}>
+            <Col sm={8}>
               <Row>
                 <Col className="m-4">
-                  <CodeViewer code={this.state.code} codePointer={this.state.codePointer} />
+                  <CodeViewer
+                    code={this.state.code}
+                    codePointer={this.state.codePointer}
+                    breakPoints={this.state.breakPoints}
+                    setBreakPoint={this.handleSetBreakPoint} />
                 </Col>
               </Row>
               <Row>
                 <Col className="m-4">
-                  <MemoryViewer memory={this.state.memory} ptr={this.state.ptr} />
+                  <MemoryViewer
+                    memory={this.state.memory}
+                    ptr={this.state.ptr} />
                 </Col>
               </Row>
             </Col>

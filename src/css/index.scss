@@ -7,11 +7,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
+textarea {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
-.site-name {
-  color: #61dafb;
+    monospace !important;
 }

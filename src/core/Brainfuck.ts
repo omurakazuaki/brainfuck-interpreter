@@ -37,6 +37,7 @@ export class Brainfuck {
   ptr: number;
   code: string;
   codePointer: number;
+  breakPoints: number[];
   status: Status = null;
 
   commands: string[];
@@ -85,6 +86,7 @@ export class Brainfuck {
     this.opt.codePointTracer(this.codePointer);
     this.opt.MemoryTracer(this.memory, this.ptr);
     this.changeStatus(Status.STOPPED);
+    this.breakPoints = [];
   }
 
   jumpList(): number[][] {
@@ -128,12 +130,21 @@ export class Brainfuck {
         setTimeout(resolve);
       });
       this.step();
+      if (this.breakPoints.includes(this.codePointer)) break;
     }
     this.changeStatus(Status.STOPPED);
   }
 
   stop() {
     this.changeStatus(Status.STOPPING);
+  }
+
+  setBreakPoints(bp: number) {
+    if (this.breakPoints.includes(bp)) {
+      this.breakPoints = this.breakPoints.filter(e => e !== bp);
+    } else {
+      this.breakPoints.push(bp);
+    }
   }
 
   step() {

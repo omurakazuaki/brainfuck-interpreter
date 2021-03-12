@@ -12,8 +12,10 @@ export default class Result extends React.Component<ResultProps> {
     return (
       <Form>
         <Form.Label>Result</Form.Label>
-        <Form.Row>
-        {this.props.result}
+        <Form.Row className="result">
+          <pre className="m-4">
+            {this.props.result}
+          </pre>
         </Form.Row>
       </Form>
     );

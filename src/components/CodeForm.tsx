@@ -39,15 +39,25 @@ export default class CodeForm extends React.Component<CodeFormProps> {
 
   render() {
     return (
-      <Form>
-        <Form.Label>Code</Form.Label>
-        <Form.Control as="textarea" aria-label="code" rows={10} onChange={this.handleChangeCode} />
-        <ButtonGroup className="mr-5">
-          <Button variant="info" onClick={this.handleClickRun} disabled={this.props.status === null || this.props.status !== Status.STOPPED}>RUN</Button>
-          <Button variant="info" onClick={this.handleClickStep} disabled={this.props.status === null || this.props.status !== Status.STOPPED}>STEP</Button>
-        </ButtonGroup>
-        <Button variant="secondary" onClick={this.handleClickStop} disabled={this.props.status !== Status.RUNNING}>STOP</Button>
-      </Form>
+      <div>
+        <Form>
+          <Form.Label>Code</Form.Label>
+          <Form.Row className="mb-4">
+            <Form.Control as="textarea" aria-label="code" rows={10} onChange={this.handleChangeCode} />
+          </Form.Row>
+        </Form>
+        <div className="d-flex">
+          <div className="mr-auto">
+            <Button variant="secondary" onClick={this.handleClickStop} disabled={this.props.status !== Status.RUNNING}>STOP</Button>
+          </div>
+          <div>
+            <ButtonGroup>
+              <Button variant="info" onClick={this.handleClickRun} disabled={this.props.status === null || this.props.status !== Status.STOPPED}>RUN</Button>
+              <Button variant="info" onClick={this.handleClickStep} disabled={this.props.status === null || this.props.status !== Status.STOPPED}>STEP</Button>
+            </ButtonGroup>
+          </div>
+        </div>
+      </div>
     );
   }
 }
