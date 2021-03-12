@@ -21,9 +21,13 @@ export default class CodeViewer extends React.Component<CodeViewerProps> {
       return null;
     }
     const className = (index: number) => {
-      if (this.props.breakPoints.includes(index)) {
+      const isBreakPoints = this.props.breakPoints.includes(index);
+      const isCurrent = index === this.props.codePointer;
+      if (isBreakPoints && isCurrent) {
+        return 'token bg-secondary px-1';
+      } else if (isBreakPoints) {
         return 'token bg-danger px-1';
-      } else if (index === this.props.codePointer) {
+      } else if (isCurrent) {
         return 'token bg-info px-1';
       } else {
         return 'token px-1';

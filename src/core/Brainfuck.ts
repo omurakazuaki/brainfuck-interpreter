@@ -27,7 +27,8 @@ type Option = {
 export enum Status {
   RUNNING,
   STOPPING,
-  STOPPED
+  STOPPED,
+  END
 }
 
 export class Brainfuck {
@@ -51,7 +52,12 @@ export class Brainfuck {
       MemoryTracer: _ => {},
       onChangeStatus: _ => {},
       write: _ => {},
-      read: () => -1, // TODO
+      read: (() => {
+        const stdin = [...'Hello, World!'];
+        return () => {
+          return stdin.shift()?.charCodeAt(0) || -1;
+        }
+      })(), // TODO
       memorySize: 1024,
       cellBits: 8,
       commands: {
@@ -105,14 +111,13 @@ export class Brainfuck {
       } else if (command === this.opt.commands.cls) {
         if (start !== 0) {
           nestCount--;
-          if (nestCount < 0) {
-            throw Error(`Syntax error: ${this.opt.commands.opn} expected.(index: ${i})`);
-          }
           if (nestCount === 0) {
             jumpList.push([start, i]);
             i = start;
             start = 0;
           }
+        } else if (!jumpList.find(v => v[1] === i)) {
+          throw Error(`Syntax error: ${this.opt.commands.opn} expected.(index: ${i})`);
         }
       }
       i += command?.length || 1;
@@ -123,16 +128,27 @@ export class Brainfuck {
     return jumpList;
   }
 
-  async run() {
+  async run(trace=false) {
     this.changeStatus(Status.RUNNING);
+    const pre = trace ? async() => {
+          await new Promise<void>(resolve =>{
+            setTimeout(resolve);
+          });
+        } : undefined;
+    const post = trace ? async() => {
+      this.opt.codePointTracer(this.codePointer);
+      this.opt.MemoryTracer(this.memory, this.ptr);
+    } : undefined;
+
     while (this.code[this.codePointer] && this.status === Status.RUNNING) {
-      await new Promise<void>(resolve =>{
-        setTimeout(resolve);
-      });
-      this.step();
-      if (this.breakPoints.includes(this.codePointer)) break;
+      await this._step(pre, post);
+      if (this.breakPoints.includes(this.codePointer)) {
+        break;
+      }
     }
     this.changeStatus(Status.STOPPED);
+    this.opt.codePointTracer(this.codePointer);
+    this.opt.MemoryTracer(this.memory, this.ptr);
   }
 
   stop() {
@@ -147,7 +163,23 @@ export class Brainfuck {
     }
   }
 
-  step() {
+  async step() {
+    this.changeStatus(Status.RUNNING);
+    const pre = async() => {
+          await new Promise<void>(resolve =>{
+            setTimeout(resolve);
+          });
+        };
+    const post = async() => {
+      this.opt.codePointTracer(this.codePointer);
+      this.opt.MemoryTracer(this.memory, this.ptr);
+    };
+    this._step(pre, post);
+    this.changeStatus(Status.STOPPED);
+  }
+
+  private async _step(pre: Function = () => {}, post: Function= () => {}) {
+    await pre();
     const currentCode = this.code.slice(this.codePointer);
     const command = this.commands.find(c => currentCode.startsWith(c));
     if (command === this.opt.commands.opn) {
@@ -173,15 +205,22 @@ export class Brainfuck {
     } else {
       // do nothing
     }
-    this.codePointer += command?.length || 1;
-    this.opt.codePointTracer(this.codePointer);
-    this.opt.MemoryTracer(this.memory, this.ptr);
+    if (command) {
+      this.codePointer += command.length;
+      await post();
+    } else {
+      this.codePointer++;
+    }
   }
 
   changeStatus(status: Status) {
     if (this.status !== status) {
-      this.status = status;
-      this.opt.onChangeStatus(status);
+      if (!this.code[this.codePointer]) {
+        this.status = Status.END;
+      } else {
+        this.status = status;
+      }
+      this.opt.onChangeStatus(this.status);
     }
   }
 };

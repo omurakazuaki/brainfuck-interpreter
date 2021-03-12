@@ -18,7 +18,8 @@ interface AppState {
   ptr: number
   codePointer: number,
   status: Status,
-  breakPoints: number[]
+  breakPoints: number[],
+  errorMessage: string
 };
 
 export default class App extends React.Component<AppProps, AppState> {
@@ -35,7 +36,8 @@ export default class App extends React.Component<AppProps, AppState> {
       ptr: null,
       codePointer: null,
       status: null,
-      breakPoints: []
+      breakPoints: [],
+      errorMessage: null
     };
     this.handleChangeCode = this.handleChangeCode.bind(this);
     this.handleRunCode = this.handleRunCode.bind(this);
@@ -47,21 +49,29 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   handleChangeCode(code: string) {
-    this.brainfuck = new Brainfuck(code, {
-      write: this.handleUpdateResult.bind(this),
-      codePointTracer: this.handleUpdateCodePointer.bind(this),
-      MemoryTracer: this.handleUpdateMemory.bind(this),
-      onChangeStatus: this.handleChangeStatus.bind(this),
-    });
+    try {
+      this.brainfuck = new Brainfuck(code, {
+        write: this.handleUpdateResult.bind(this),
+        codePointTracer: this.handleUpdateCodePointer.bind(this),
+        MemoryTracer: this.handleUpdateMemory.bind(this),
+        onChangeStatus: this.handleChangeStatus.bind(this),
+      });
+      this.setState({
+        code: this.brainfuck.code,
+        breakPoints: this.brainfuck.breakPoints,
+        result: '',
+        errorMessage: ''
+      });
+      this.result = '';
+    } catch (err) {
     this.setState({
-      code: this.brainfuck.code,
-      breakPoints: this.brainfuck.breakPoints,
-      result: ''
+      errorMessage: err.message
     });
-    this.result = '';
+    }
   }
 
   handleUpdateResult(n: number) {
+    if (n < 0) return;
     this.result += String.fromCodePoint(n);
     this.setState({
       result: this.result
@@ -76,8 +86,8 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setState({memory, ptr});
   }
 
-  handleRunCode() {
-    this.brainfuck.run();
+  handleRunCode(trace) {
+    this.brainfuck.run(trace);
   }
 
   handleStepCode() {
@@ -120,6 +130,7 @@ export default class App extends React.Component<AppProps, AppState> {
                 <Col>
                   <CodeForm
                     status={this.state.status}
+                    errorMessage={this.state.errorMessage}
                     updateCode={this.handleChangeCode}
                     runCode={this.handleRunCode}
                     stepCode={this.handleStepCode}

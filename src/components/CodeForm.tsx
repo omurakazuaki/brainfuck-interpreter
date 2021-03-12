@@ -4,14 +4,17 @@ import { Status } from '../core/Brainfuck';
 
 interface CodeFormProps {
   updateCode: (string) => void,
-  runCode: () => void,
+  runCode: (boolean) => void,
   stepCode: () => void,
   stop:() => void,
   reset:() => void,
-  status: Status
+  status: Status,
+  errorMessage: String
 };
 
 export default class CodeForm extends React.Component<CodeFormProps> {
+
+  trace: React.RefObject<HTMLInputElement>;
 
   constructor(props) {
     super(props);
@@ -20,6 +23,7 @@ export default class CodeForm extends React.Component<CodeFormProps> {
     this.handleClickStep = this.handleClickStep.bind(this);
     this.handleClickStop = this.handleClickStop.bind(this);
     this.handleClickReset = this.handleClickReset.bind(this);
+    this.trace = React.createRef();
   }
 
   handleChangeCode(e) {
@@ -27,7 +31,7 @@ export default class CodeForm extends React.Component<CodeFormProps> {
   }
 
   handleClickRun(_) {
-    this.props.runCode();
+    this.props.runCode(this.trace.current.checked);
   }
 
   handleClickStep(_) {
@@ -46,17 +50,27 @@ export default class CodeForm extends React.Component<CodeFormProps> {
     return (
       <div>
         <Form>
-          <Form.Label>Code</Form.Label>
-          <Form.Row className="mb-4">
-            <Form.Control as="textarea" aria-label="code" rows={18} onChange={this.handleChangeCode} />
+          <Form.Row className="mb-1">
+            <Form.Label>Code</Form.Label>
+            <Form.Control as="textarea" aria-label="code" rows={10} onChange={this.handleChangeCode} />
           </Form.Row>
+          <Form.Row className="mb-4">
+            <p className="text-danger">{this.props.errorMessage}</p>
+          </Form.Row>
+          {/* <Form.Row className="mb-4">
+            <Form.Label>Stdin</Form.Label>
+            <Form.Control as="textarea" aria-label="stdin" rows={3} ref={this.stdin} />
+          </Form.Row> */}
         </Form>
-        <div className="d-flex">
+        <Form.Row className="d-flex">
           <div className="mr-auto">
             <ButtonGroup>
               <Button variant="secondary" onClick={this.handleClickStop} disabled={this.props.status !== Status.RUNNING}>STOP</Button>
-              <Button variant="secondary" onClick={this.handleClickReset} disabled={this.props.status === null || this.props.status !== Status.STOPPED}>RESET</Button>
+              <Button variant="secondary" onClick={this.handleClickReset} disabled={this.props.status === null || (this.props.status !== Status.STOPPED && this.props.status !== Status.END)}>RESET</Button>
             </ButtonGroup>
+          </div>
+          <div className="mr-4">
+            <Form.Check label="STEP TRACE" ref={this.trace} />
           </div>
           <div>
             <ButtonGroup>
@@ -64,7 +78,7 @@ export default class CodeForm extends React.Component<CodeFormProps> {
               <Button variant="info" onClick={this.handleClickStep} disabled={this.props.status === null || this.props.status !== Status.STOPPED}>STEP</Button>
             </ButtonGroup>
           </div>
-        </div>
+        </Form.Row>
       </div>
     );
   }

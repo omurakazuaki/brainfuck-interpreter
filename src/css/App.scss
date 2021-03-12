@@ -1,7 +1,6 @@
 .base {
   background-color: #282c34;
   min-height: calc(100vh - 112px);
-  font-size: calc(10px + 1vmin);
   color: white;
 }
 
@@ -20,6 +19,7 @@
 
 .memory {
   height: 50vh;
+  font-size: calc(10px + 1vmin);
   overflow-y: scroll;
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
