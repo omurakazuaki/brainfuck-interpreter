@@ -5,8 +5,8 @@ type MemoryTracer = (memory: Int8Array, ptr: number) => void;
 type OnChangeStatus = (status: Status) => void;
 
 type Option = {
-  codePointTracer?: CodePointTracer;
-  MemoryTracer?: MemoryTracer;
+  onChangeCodePointer?: CodePointTracer;
+  onChangeMemory?: MemoryTracer;
   onChangeStatus?: OnChangeStatus;
   write?: Write;
   read?: Read;
@@ -48,8 +48,8 @@ export class Brainfuck {
   constructor(code: string, opt?: Option) {
     this.code = code;
     const defaultOption: Option = {
-      codePointTracer: _ => {},
-      MemoryTracer: _ => {},
+      onChangeCodePointer: _ => {},
+      onChangeMemory: _ => {},
       onChangeStatus: _ => {},
       write: _ => {},
       read: (() => {
@@ -89,8 +89,8 @@ export class Brainfuck {
       return acc;
     },{});
     this.commands = Object.values(this.opt.commands);
-    this.opt.codePointTracer(this.codePointer);
-    this.opt.MemoryTracer(this.memory, this.ptr);
+    this.opt.onChangeCodePointer(this.codePointer);
+    this.opt.onChangeMemory(this.memory, this.ptr);
     this.changeStatus(Status.STOPPED);
     this.breakPoints = [];
   }
@@ -136,8 +136,8 @@ export class Brainfuck {
           });
         } : undefined;
     const post = trace ? async() => {
-      this.opt.codePointTracer(this.codePointer);
-      this.opt.MemoryTracer(this.memory, this.ptr);
+      this.opt.onChangeCodePointer(this.codePointer);
+      this.opt.onChangeMemory(this.memory, this.ptr);
     } : undefined;
 
     while (this.code[this.codePointer] && this.status === Status.RUNNING) {
@@ -147,15 +147,15 @@ export class Brainfuck {
       }
     }
     this.changeStatus(Status.STOPPED);
-    this.opt.codePointTracer(this.codePointer);
-    this.opt.MemoryTracer(this.memory, this.ptr);
+    this.opt.onChangeCodePointer(this.codePointer);
+    this.opt.onChangeMemory(this.memory, this.ptr);
   }
 
   stop() {
     this.changeStatus(Status.STOPPING);
   }
 
-  setBreakPoints(bp: number) {
+  setBreakPoint(bp: number) {
     if (this.breakPoints.includes(bp)) {
       this.breakPoints = this.breakPoints.filter(e => e !== bp);
     } else {
@@ -171,8 +171,8 @@ export class Brainfuck {
           });
         };
     const post = async() => {
-      this.opt.codePointTracer(this.codePointer);
-      this.opt.MemoryTracer(this.memory, this.ptr);
+      this.opt.onChangeCodePointer(this.codePointer);
+      this.opt.onChangeMemory(this.memory, this.ptr);
     };
     this._step(pre, post);
     this.changeStatus(Status.STOPPED);

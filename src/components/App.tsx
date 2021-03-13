@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { Brainfuck, Status } from '../core/Brainfuck';
 import Header from './Header';
@@ -9,163 +9,101 @@ import MemoryViewer from './MemoryViewer';
 import Footer from './Footer';
 import '../css/App.scss';
 
-interface AppProps {}
+const App = () => {
 
-interface AppState {
-  code: string
-  result: string
-  memory: Int8Array
-  ptr: number
-  codePointer: number,
-  status: Status,
-  breakPoints: number[],
-  errorMessage: string
-};
+  const [interpreter, setInterpreter] = useState<Brainfuck>(null);
+  const [code, setCode] = useState<string>(null);
+  const [codePointer, setCodePointer] = useState<number>(null);
+  const [memory, setMemory] = useState<Int8Array>(null);
+  const [ptr, setPtr] = useState<number>(null);
+  const [status, setStatus] = useState<Status>(null);
+  const [breakPoints, setBreakPoints] = useState<number[]>([]);
+  const [result, setResult] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>(null);
 
-export default class App extends React.Component<AppProps, AppState> {
-
-  brainfuck: Brainfuck;
-  result: string
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      code: null,
-      result: '',
-      memory: null,
-      ptr: null,
-      codePointer: null,
-      status: null,
-      breakPoints: [],
-      errorMessage: null
-    };
-    this.handleChangeCode = this.handleChangeCode.bind(this);
-    this.handleRunCode = this.handleRunCode.bind(this);
-    this.handleStepCode = this.handleStepCode.bind(this);
-    this.handleStop = this.handleStop.bind(this);
-    this.handleReset = this.handleReset.bind(this);
-    this.handleSetBreakPoint = this.handleSetBreakPoint.bind(this);
-    this.result = '';
-  }
-
-  handleChangeCode(code: string) {
+  const handleChangeCode = (code: string) => {
     try {
-      this.brainfuck = new Brainfuck(code, {
-        write: this.handleUpdateResult.bind(this),
-        codePointTracer: this.handleUpdateCodePointer.bind(this),
-        MemoryTracer: this.handleUpdateMemory.bind(this),
-        onChangeStatus: this.handleChangeStatus.bind(this),
+      const newInterpreter = new Brainfuck(code, {
+        write: (n: number) => {
+          if (n < 0) return;
+          setResult(s => s + String.fromCodePoint(n));
+        },
+        onChangeCodePointer: setCodePointer,
+        onChangeMemory: (memory: Int8Array, ptr: number) => {
+          setMemory(memory);
+          setPtr(ptr);
+        },
+        onChangeStatus: setStatus,
       });
-      this.setState({
-        code: this.brainfuck.code,
-        breakPoints: this.brainfuck.breakPoints,
-        result: '',
-        errorMessage: ''
-      });
-      this.result = '';
+      setInterpreter(newInterpreter);
+      initState(newInterpreter);
     } catch (err) {
-    this.setState({
-      errorMessage: err.message
-    });
+      setErrorMessage(err.message);
     }
   }
 
-  handleUpdateResult(n: number) {
-    if (n < 0) return;
-    this.result += String.fromCodePoint(n);
-    this.setState({
-      result: this.result
-    });
+  const initState = (newInterpreter: Brainfuck) => {
+      setCode(newInterpreter.code);
+      setBreakPoints(newInterpreter.breakPoints);
+      setResult('');
+      setErrorMessage(null);
   }
 
-  handleUpdateCodePointer(codePointer: number) {
-    this.setState({codePointer});
-  }
+  return (
+    <div className="d-flex flex-column">
+      <Header/>
+      <Container className='base' fluid={true}>
+        <Row>
+          <Col sm={4}>
+            <Row className="m-4">
+              <Col>
+                <CodeForm
+                  status={status}
+                  errorMessage={errorMessage}
+                  onUpdateCode={handleChangeCode}
+                  onRun={trace => interpreter.run(trace)}
+                  onStep={() => interpreter.step()}
+                  onStop={() => interpreter.stop()}
+                  onReset={() => {
+                    interpreter.reset();
+                    initState(interpreter)
+                    }
+                  } />
+              </Col>
+            </Row>
+            <Row>
+              <Col className="m-4">
+                <Result result={result} />
+              </Col>
+            </Row>
+          </Col>
+          <Col sm={8}>
+            <Row>
+              <Col className="m-4">
+                <CodeViewer
+                  code={code}
+                  codePointer={codePointer}
+                  breakPoints={breakPoints}
+                  onSetBreakPoint={bp => {
+                    interpreter.setBreakPoint(bp);
+                    setBreakPoints([...interpreter.breakPoints]);
+                    }
+                  } />
+              </Col>
+            </Row>
+            <Row>
+              <Col className="m-4">
+                <MemoryViewer
+                  memory={memory}
+                  ptr={ptr} />
+              </Col>
+            </Row>
+          </Col>
+        </Row>
+      </Container>
+      <Footer/>
+    </div>
+  );
+};
 
-  handleUpdateMemory(memory: Int8Array, ptr: number) {
-    this.setState({memory, ptr});
-  }
-
-  handleRunCode(trace) {
-    this.brainfuck.run(trace);
-  }
-
-  handleStepCode() {
-    this.brainfuck.step();
-  }
-
-  handleStop() {
-    this.brainfuck.stop();
-  }
-
-  handleReset() {
-    this.brainfuck.reset();
-    this.setState({
-      code: this.brainfuck.code,
-      breakPoints: this.brainfuck.breakPoints,
-      result: ''
-    });
-    this.result = '';
-  }
-
-  handleChangeStatus(status) {
-    this.setState({status});
-  }
-
-  handleSetBreakPoint(bp: number) {
-    this.brainfuck.setBreakPoints(bp);
-    this.setState({
-      breakPoints: this.brainfuck.breakPoints
-    });
-  }
-
-  render() {
-    return (
-      <div className="d-flex flex-column">
-        <Header/>
-        <Container className='base' fluid={true}>
-          <Row>
-            <Col sm={4}>
-              <Row className="m-4">
-                <Col>
-                  <CodeForm
-                    status={this.state.status}
-                    errorMessage={this.state.errorMessage}
-                    updateCode={this.handleChangeCode}
-                    runCode={this.handleRunCode}
-                    stepCode={this.handleStepCode}
-                    stop={this.handleStop}
-                    reset={this.handleReset} />
-                </Col>
-              </Row>
-              <Row>
-                <Col className="m-4">
-                  <Result result={this.state.result} />
-                </Col>
-              </Row>
-            </Col>
-            <Col sm={8}>
-              <Row>
-                <Col className="m-4">
-                  <CodeViewer
-                    code={this.state.code}
-                    codePointer={this.state.codePointer}
-                    breakPoints={this.state.breakPoints}
-                    setBreakPoint={this.handleSetBreakPoint} />
-                </Col>
-              </Row>
-              <Row>
-                <Col className="m-4">
-                  <MemoryViewer
-                    memory={this.state.memory}
-                    ptr={this.state.ptr} />
-                </Col>
-              </Row>
-            </Col>
-          </Row>
-        </Container>
-        <Footer/>
-      </div>
-    );
-  }
-}
+export default App;

@@ -1,85 +1,75 @@
-import React from 'react';
+import {useState, createRef} from 'react';
 import { Form, ButtonGroup, Button } from 'react-bootstrap';
 import { Status } from '../core/Brainfuck';
 
-interface CodeFormProps {
-  updateCode: (string) => void,
-  runCode: (boolean) => void,
-  stepCode: () => void,
-  stop:() => void,
-  reset:() => void,
+interface Props {
+  onUpdateCode: (string) => void,
+  onRun: (boolean) => void,
+  onStep: () => void,
+  onStop:() => void,
+  onReset:() => void,
   status: Status,
   errorMessage: String
 };
 
-export default class CodeForm extends React.Component<CodeFormProps> {
+const CodeForm = (props: Props) => {
 
-  trace: React.RefObject<HTMLInputElement>;
+  const [ trace ] = useState<React.RefObject<HTMLInputElement>>(createRef());
 
-  constructor(props) {
-    super(props);
-    this.handleChangeCode = this.handleChangeCode.bind(this);
-    this.handleClickRun = this.handleClickRun.bind(this);
-    this.handleClickStep = this.handleClickStep.bind(this);
-    this.handleClickStop = this.handleClickStop.bind(this);
-    this.handleClickReset = this.handleClickReset.bind(this);
-    this.trace = React.createRef();
-  }
+  const handleChangeCode = (e) => {
+    props.onUpdateCode(e.target.value);
+  };
 
-  handleChangeCode(e) {
-    this.props.updateCode(e.target.value);
-  }
+  const handleClickRun = (_) => {
+    props.onRun(trace.current.checked);
+  };
 
-  handleClickRun(_) {
-    this.props.runCode(this.trace.current.checked);
-  }
+  const handleClickStep = (_) => {
+    props.onStep();
+  };
 
-  handleClickStep(_) {
-    this.props.stepCode();
-  }
+  const handleClickStop = (_) => {
+    props.onStop();
+  };
 
-  handleClickStop(_) {
-    this.props.stop();
-  }
+  const handleClickReset = (_) => {
+    props.onReset();
+  };
 
-  handleClickReset(_) {
-    this.props.reset();
-  }
-
-  render() {
-    return (
-      <div>
-        <Form>
-          <Form.Row className="mb-1">
-            <Form.Label>Code</Form.Label>
-            <Form.Control as="textarea" aria-label="code" rows={10} onChange={this.handleChangeCode} />
-          </Form.Row>
-          <Form.Row className="mb-4">
-            <p className="text-danger">{this.props.errorMessage}</p>
-          </Form.Row>
-          {/* <Form.Row className="mb-4">
-            <Form.Label>Stdin</Form.Label>
-            <Form.Control as="textarea" aria-label="stdin" rows={3} ref={this.stdin} />
-          </Form.Row> */}
-        </Form>
-        <Form.Row className="d-flex">
-          <div className="mr-auto">
-            <ButtonGroup>
-              <Button variant="secondary" onClick={this.handleClickStop} disabled={this.props.status !== Status.RUNNING}>STOP</Button>
-              <Button variant="secondary" onClick={this.handleClickReset} disabled={this.props.status === null || (this.props.status !== Status.STOPPED && this.props.status !== Status.END)}>RESET</Button>
-            </ButtonGroup>
-          </div>
-          <div className="mr-4">
-            <Form.Check label="STEP TRACE" ref={this.trace} />
-          </div>
-          <div>
-            <ButtonGroup>
-              <Button variant="info" onClick={this.handleClickRun} disabled={this.props.status === null || this.props.status !== Status.STOPPED}>RUN</Button>
-              <Button variant="info" onClick={this.handleClickStep} disabled={this.props.status === null || this.props.status !== Status.STOPPED}>STEP</Button>
-            </ButtonGroup>
-          </div>
+  return (
+    <div>
+      <Form>
+        <Form.Row className="mb-1">
+          <Form.Label>Code</Form.Label>
+          <Form.Control as="textarea" aria-label="code" rows={10} onChange={handleChangeCode} />
         </Form.Row>
-      </div>
-    );
-  }
+        <Form.Row className="mb-4">
+          <p className="text-danger">{props.errorMessage}</p>
+        </Form.Row>
+        {/* <Form.Row className="mb-4">
+          <Form.Label>Stdin</Form.Label>
+          <Form.Control as="textarea" aria-label="stdin" rows={3} ref={this.stdin} />
+        </Form.Row> */}
+      </Form>
+      <Form.Row className="d-flex">
+        <div className="mr-auto">
+          <ButtonGroup>
+            <Button variant="secondary" onClick={handleClickStop} disabled={props.status !== Status.RUNNING}>STOP</Button>
+            <Button variant="secondary" onClick={handleClickReset} disabled={props.status === null || (props.status !== Status.STOPPED && props.status !== Status.END)}>RESET</Button>
+          </ButtonGroup>
+        </div>
+        <div className="mr-4">
+          <Form.Check label="STEP TRACE" ref={trace} />
+        </div>
+        <div>
+          <ButtonGroup>
+            <Button variant="info" onClick={handleClickRun} disabled={props.status === null || props.status !== Status.STOPPED}>RUN</Button>
+            <Button variant="info" onClick={handleClickStep} disabled={props.status === null || props.status !== Status.STOPPED}>STEP</Button>
+          </ButtonGroup>
+        </div>
+      </Form.Row>
+    </div>
+  );
 }
+
+export default CodeForm;
