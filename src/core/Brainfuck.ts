@@ -99,7 +99,7 @@ export class Brainfuck {
     const jumpList = [];
     const commands = Object.values(this.opt.commands);
     let nestCount = 0;
-    let start = 0;
+    let start = -1;
     for (let i = 0; this.code[i];) {
       const currentCode = this.code.slice(i);
       const command = commands.find(c => currentCode.startsWith(c));
@@ -109,12 +109,12 @@ export class Brainfuck {
         }
         nestCount++;
       } else if (command === this.opt.commands.cls) {
-        if (start !== 0) {
+        if (start !== -1) {
           nestCount--;
           if (nestCount === 0) {
             jumpList.push([start, i]);
             i = start;
-            start = 0;
+            start = -1;
           }
         } else if (!jumpList.find(v => v[1] === i)) {
           throw Error(`Syntax error: ${this.opt.commands.opn} expected.(index: ${i})`);
@@ -122,7 +122,7 @@ export class Brainfuck {
       }
       i += command?.length || 1;
     }
-    if (start !== 0) {
+    if (start !== -1) {
       throw Error(`Syntax error: ${this.opt.commands.cls} expected.(index: ${(start)})`);
     }
     return jumpList;
