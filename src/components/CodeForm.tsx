@@ -4,12 +4,14 @@ import { Status } from '../core/Brainfuck';
 
 interface Props {
   onUpdateCode: (string) => void,
+  onUpdateStdin: (string) => void,
   onRun: (boolean) => void,
   onStep: () => void,
   onStop:() => void,
   onReset:() => void,
   status: Status,
-  errorMessage: String
+  stdin: string,
+  errorMessage: string,
 };
 
 const CodeForm = (props: Props) => {
@@ -18,6 +20,10 @@ const CodeForm = (props: Props) => {
 
   const handleChangeCode = (e) => {
     props.onUpdateCode(e.target.value);
+  };
+
+  const handleChangeStdin = (e) => {
+    props.onUpdateStdin(e.target.value);
   };
 
   const handleClickRun = (_) => {
@@ -41,15 +47,18 @@ const CodeForm = (props: Props) => {
       <Form>
         <Form.Row className="mb-1">
           <Form.Label>Code</Form.Label>
-          <Form.Control as="textarea" aria-label="code" rows={10} onChange={handleChangeCode} />
+          <Form.Control as="textarea" aria-label="code" rows={10} readOnly={!(props.status === null || props.status === Status.READY)} onChange={handleChangeCode} />
         </Form.Row>
         <Form.Row className="mb-4">
           <p className="text-danger">{props.errorMessage}</p>
         </Form.Row>
-        {/* <Form.Row className="mb-4">
+        <Form.Row className="mb-4">
           <Form.Label>Stdin</Form.Label>
-          <Form.Control as="textarea" aria-label="stdin" rows={3} ref={this.stdin} />
-        </Form.Row> */}
+          { props.status === Status.READY
+            ? <Form.Control as="textarea" aria-label="stdin" rows={3} onChange={handleChangeStdin} />
+            : <Form.Control as="textarea" aria-label="stdin" rows={3} value={props.stdin} readOnly={true} />
+          }
+        </Form.Row>
       </Form>
       <Form.Row className="d-flex">
         <div className="mr-auto">
@@ -63,8 +72,8 @@ const CodeForm = (props: Props) => {
         </div>
         <div>
           <ButtonGroup>
-            <Button variant="info" onClick={handleClickRun} disabled={props.status === null || props.status !== Status.STOPPED}>RUN</Button>
-            <Button variant="info" onClick={handleClickStep} disabled={props.status === null || props.status !== Status.STOPPED}>STEP</Button>
+            <Button variant="info" onClick={handleClickRun} disabled={props.status === null || (props.status !== Status.STOPPED && props.status !== Status.READY)}>RUN</Button>
+            <Button variant="info" onClick={handleClickStep} disabled={props.status === null || (props.status !== Status.STOPPED && props.status !== Status.READY)}>STEP</Button>
           </ButtonGroup>
         </div>
       </Form.Row>

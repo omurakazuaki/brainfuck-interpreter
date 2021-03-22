@@ -25,6 +25,7 @@ type Option = {
 };
 
 export enum Status {
+  READY,
   RUNNING,
   STOPPING,
   STOPPED,
@@ -91,7 +92,7 @@ export class Brainfuck {
     this.commands = Object.values(this.opt.commands);
     this.opt.onChangeCodePointer(this.codePointer);
     this.opt.onChangeMemory(this.memory, this.ptr);
-    this.changeStatus(Status.STOPPED);
+    this.changeStatus(Status.READY);
     this.breakPoints = [];
   }
 
@@ -215,7 +216,7 @@ export class Brainfuck {
 
   changeStatus(status: Status) {
     if (this.status !== status) {
-      if (!this.code[this.codePointer]) {
+      if (this.status == Status.STOPPED && !this.code[this.codePointer]) {
         this.status = Status.END;
       } else {
         this.status = status;
