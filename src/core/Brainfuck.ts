@@ -216,7 +216,7 @@ export class Brainfuck {
 
   changeStatus(status: Status) {
     if (this.status !== status) {
-      if (this.status == Status.STOPPED && !this.code[this.codePointer]) {
+      if (this.status === Status.STOPPED && !this.code[this.codePointer]) {
         this.status = Status.END;
       } else {
         this.status = status;
