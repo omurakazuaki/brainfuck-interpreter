@@ -131,18 +131,18 @@ export class Brainfuck {
 
   async run(trace=false) {
     this.changeStatus(Status.RUNNING);
-    const pre = trace ? async() => {
-          await new Promise<void>(resolve =>{
-            setTimeout(resolve);
-          });
-        } : undefined;
     const post = trace ? async() => {
-      this.opt.onChangeCodePointer(this.codePointer);
-      this.opt.onChangeMemory(this.memory, this.ptr);
+      await new Promise<void>(resolve => {
+            setTimeout(() => {
+              this.opt.onChangeCodePointer(this.codePointer);
+              this.opt.onChangeMemory(this.memory, this.ptr);
+              resolve();
+            });
+      });
     } : undefined;
 
     while (this.code[this.codePointer] && this.status === Status.RUNNING) {
-      await this._step(pre, post);
+      await this._step(post);
       if (this.breakPoints.includes(this.codePointer)) {
         break;
       }
@@ -166,21 +166,20 @@ export class Brainfuck {
 
   async step() {
     this.changeStatus(Status.RUNNING);
-    const pre = async() => {
-          await new Promise<void>(resolve =>{
-            setTimeout(resolve);
-          });
-        };
     const post = async() => {
-      this.opt.onChangeCodePointer(this.codePointer);
-      this.opt.onChangeMemory(this.memory, this.ptr);
+      await new Promise<void>(resolve => {
+            setTimeout(() => {
+              this.opt.onChangeCodePointer(this.codePointer);
+              this.opt.onChangeMemory(this.memory, this.ptr);
+              resolve();
+            });
+      });
     };
-    this._step(pre, post);
+    this._step(post);
     this.changeStatus(Status.STOPPED);
   }
 
-  private async _step(pre: Function = () => {}, post: Function= () => {}) {
-    await pre();
+  private async _step(post: Function= () => {}) {
     const currentCode = this.code.slice(this.codePointer);
     const command = this.commands.find(c => currentCode.startsWith(c));
     if (command === this.opt.commands.opn) {
